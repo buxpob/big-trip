@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../view/abstract-view.js';
 
 const createSiteMenuTemplate = () => (
   `<nav class="trip-controls__trip-tabs  trip-tabs">
@@ -7,22 +7,8 @@ const createSiteMenuTemplate = () => (
   </nav>`
 );
 
-export default class SiteMenuTemplate {
-  #element = null;
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
-  }
-
+export default class SiteMenuTemplate extends AbstractView {
   get template() {
     return createSiteMenuTemplate();
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

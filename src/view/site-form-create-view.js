@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { createElement } from '../render.js';
+import AbstractView from '../view/abstract-view.js';
 
 const BLANK_POINT = {
   date: dayjs().format('DD/MM/YY'),
@@ -156,28 +156,25 @@ const createSiteEditFormTemplate = (point) => {
     </form>
   </li>`;
 };
-
-export default class SiteEditFormTemplate {
-  #element = null;
+export default class SiteEditFormTemplate extends AbstractView {
   #point = null;
 
   constructor(point = BLANK_POINT) {
+    super();
     this.#point = point;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
   }
 
   get template() {
     return createSiteEditFormTemplate(this.#point);
   }
 
-  removeElement() {
-    this.#element = null;
+  setFormSubmitHandler = (callback) => {
+    this._callback.formSubmit = callback;
+    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
+  };
+
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formSubmit();
   }
 }

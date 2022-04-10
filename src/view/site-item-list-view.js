@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { createElement } from '../render.js';
+import AbstractView from '../view/abstract-view.js';
 
 const createSiteItemPoint = (point) => {
   const {date, type, city, price} = point;
@@ -42,28 +42,25 @@ const createSiteItemPoint = (point) => {
     </div>
   </li>`;
 };
-
-export default class SiteItemPoint {
-  #element = null;
+export default class SiteItemPoint extends AbstractView {
   #point = null;
 
   constructor(point) {
+    super();
     this.#point = point;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
   }
 
   get template() {
     return createSiteItemPoint(this.#point);
   }
 
-  removeElement() {
-    this.#element = null;
+  setEditClickHandler = (callback) => {
+    this._callback.editClick = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
+  }
+
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.editClick();
   }
 }

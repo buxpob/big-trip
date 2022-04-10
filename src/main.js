@@ -1,4 +1,4 @@
-import { renderElement, RenderPosition } from './render.js';
+import { render, RenderPosition, replace } from './render.js';
 import InfoView from './view/site-trip-info-view.js';
 import MenuView from './view/site-menu-view.js';
 import FilterView from './view/site-filter-view.js';
@@ -11,7 +11,7 @@ import NoPointsFilterView from './view/site-empty-filter-view.js';
 import { createPointRoute } from './mock-point-route.js';
 import { createFilter } from './view/filter.js';
 
-const COUNT_ADS = 1;
+const COUNT_ADS = 5;
 
 const pointsRoute = Array.from({length: COUNT_ADS}, createPointRoute).sort((a, b) => b.date - a.date);
 
@@ -21,22 +21,22 @@ const siteFilter = siteHeader.querySelector('.trip-controls__filters');
 const siteMain = document.querySelector('.page-main');
 const sitePoints = siteMain.querySelector('.trip-events');
 
-renderElement(siteMenuNavigation, new InfoView().element, RenderPosition.BEFOREEND);
-renderElement(siteMenuNavigation, new MenuView().element, RenderPosition.BEFOREEND);
+render(siteMenuNavigation, new InfoView(), RenderPosition.BEFOREEND);
+render(siteMenuNavigation, new MenuView(), RenderPosition.BEFOREEND);
 
 const filterComponent = new FilterView();
-renderElement(siteFilter, filterComponent.element, RenderPosition.BEFOREEND);
+render(siteFilter, filterComponent, RenderPosition.BEFOREEND);
 
 const renderPoint = (list, point) => {
   const pointComponent = new ItemPointView(point);
   const pointEditComponent = new EditFormView(point);
 
   const replacePointToForm = () => {
-    list.replaceChild(pointEditComponent.element, pointComponent.element);
+    replace(pointEditComponent, pointComponent);
   };
 
   const replaceFormToPoint = () => {
-    list.replaceChild(pointComponent.element, pointEditComponent.element);
+    replace(pointComponent, pointEditComponent);
   };
 
   const onEscKeyDown = (evt) => {
@@ -47,27 +47,26 @@ const renderPoint = (list, point) => {
     }
   };
 
-  pointComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+  pointComponent.setEditClickHandler(() => {
     replacePointToForm();
     document.addEventListener('keydown', onEscKeyDown);
-    // pointComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => replaceFormToPoint());
   });
+  // pointComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => replaceFormToPoint());
 
-  pointEditComponent.element.querySelector('form').addEventListener('submit', (evt) => {
-    evt.preventDefault();
+  pointEditComponent.setFormSubmitHandler(() => {
     replaceFormToPoint();
   });
 
-  renderElement(list, pointComponent.element, RenderPosition.BEFOREEND);
+  render(list, pointComponent, RenderPosition.BEFOREEND);
 };
 
 const renderListPoints = (container) => {
-  renderElement(container, new SortView().element, RenderPosition.AFTERBEGINE);
+  render(container, new SortView(), RenderPosition.AFTERBEGINE);
   const listPointsComponent = new ListView();
-  renderElement(container, listPointsComponent.element, RenderPosition.BEFOREEND);
+  render(container, listPointsComponent, RenderPosition.BEFOREEND);
 
   if (pointsRoute.length === 0) {
-    renderElement(sitePoints, new NoPointsView().element, RenderPosition.BEFOREEND);
+    render(sitePoints, new NoPointsView(), RenderPosition.BEFOREEND);
   } else {
     for (const point of pointsRoute) {
       renderPoint(listPointsComponent.element, point);
@@ -75,7 +74,7 @@ const renderListPoints = (container) => {
   }
 
   const noPointsFilter = new NoPointsFilterView();
-  renderElement(sitePoints, noPointsFilter.element, RenderPosition.BEFOREEND);
+  render(sitePoints, noPointsFilter, RenderPosition.BEFOREEND);
 
   const listPoints = Array.from(listPointsComponent.element.children);
   createFilter(filterComponent.element, listPoints, pointsRoute, noPointsFilter.element);
