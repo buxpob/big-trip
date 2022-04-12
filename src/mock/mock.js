@@ -1,6 +1,7 @@
 /* global _:readonly */
 
 import dayjs from 'dayjs';
+import {nanoid} from 'nanoid';
 
 const typeRoute = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
 
@@ -107,10 +108,13 @@ export const createPointRoute = () => {
   const offers = createListOffers(typePoint);
 
   return {
+    id: nanoid(),
     date: getRandomDate(),
+    time: _.random(30, 60),
     type: typePoint,
     city: getRandomCity(),
     offer: offers,
+    isFavorite: true,
     price: createPrice(offers),
     info: {
       descriptions: createListDescriptions(),

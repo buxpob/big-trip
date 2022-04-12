@@ -1,4 +1,4 @@
-import AbstractView from './view/abstract-view.js';
+import AbstractView from '../view/abstract-view.js';
 
 export const RenderPosition = {
   BEFOREBEGIN: 'beforebegin',
@@ -56,6 +56,5 @@ export const remove = (component) => {
     throw new Error('Can remove only components');
   }
 
-  component.element.remove();
-  component.removeElement();
+  component.remove();
 };
