@@ -156,7 +156,7 @@ const createSiteEditFormTemplate = (point) => {
     </form>
   </li>`;
 };
-export default class SiteEditFormTemplate extends AbstractView {
+export default class ItemPointForm extends AbstractView {
   #point = null;
 
   constructor(point = BLANK_POINT) {
