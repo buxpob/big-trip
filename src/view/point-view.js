@@ -1,23 +1,46 @@
 import dayjs from 'dayjs';
-import AbstractView from '../view/abstract-view.js';
+import AbstractView from './abstract-view.js';
 
 const createSiteItemPoint = (point) => {
-  const {date, type, city, price, isFavorite, time} = point;
+  const {price, dateStart, dateEnd, isFavorite, type, destination} = point;
+
+  const city = destination.name;
+
+  const dateDayForm = (date) => dayjs(date).format('DD-MM-YYYY');
+  const dateDayValue = (date) => dayjs(date).format('MMM DD');
+  const dateTimeForm = (date) => dayjs(date).format('DD/MM/YY hh mm');
+  const dateTimeValue = (date) => dayjs(date).format('hh:mm');
+
+  const time = dayjs(dateEnd).diff(dayjs(dateStart), 'm');
+
+  const renderTime = (currentTime) => {
+    if (currentTime <= 60) {
+      return `${currentTime}M`;
+    }
+
+    if (currentTime > 60 && currentTime <= 60*24) {
+      return `${Math.floor(currentTime/60)}H ${(currentTime%60)}M`;
+    }
+
+    if (currentTime > 60*24) {
+      return `${Math.floor(currentTime/(60*24))}D ${Math.floor((currentTime%60*24)/24)}H ${currentTime%60}M`;
+    }
+  };
 
   return `<li class="trip-events__item">
     <div class="event">
-      <time class="event__date" datetime="${dayjs(date).format('DD-MM-YYYY')}">${dayjs(date).format('MMM DD')}</time>
+      <time class="event__date" datetime="${dateDayForm(dateStart)}">${dateDayValue(dateStart)}</time>
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
       </div>
       <h3 class="event__title">${type} ${city}</h3>
       <div class="event__schedule">
         <p class="event__time">
-          <time class="event__start-time" datetime="2019-03-18T10:30">10:30</time>
+          <time class="event__start-time" datetime="${dateTimeForm(dateStart)}">${dateTimeValue(dateStart)}</time>
           &mdash;
-          <time class="event__end-time" datetime="2019-03-18T11:00">11:00</time>
+          <time class="event__end-time" datetime="${dateTimeForm(dateEnd)}">${dateTimeValue(dateEnd)}</time>
         </p>
-        <p class="event__duration">${time}M</p>
+        <p class="event__duration">${renderTime(time)}</p>
       </div>
       <p class="event__price">
         &euro;&nbsp;<span class="event__price-value">${price}</span>
@@ -71,6 +94,6 @@ export default class ItemPoint extends AbstractView {
 
   #favoriteClickHandler = (evt) => {
     evt.preventDefault();
-    this._callback.favoriteClick();
+    this._callback.favoriteClick(evt.target);
   }
 }

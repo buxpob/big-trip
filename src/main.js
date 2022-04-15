@@ -1,9 +1,10 @@
-import { render, RenderPosition} from './render/render.js';
-import InfoView from './view/site-trip-info-view.js';
-import MenuView from './view/site-menu-view.js';
-import FilterView from './view/site-filter-view.js';
+import { render } from './utils/render.js';
+import { RenderPosition } from './utils/const.js';
+import InfoView from './view/info-view.js';
+import MenuView from './view/menu-view.js';
+import FilterView from './view/filter-view.js';
 // import NoPointsFilterView from './view/site-empty-filter-view.js';
-import { createPointRoute } from './mock/mock.js';
+import { createPointRoute } from './utils/mock.js';
 // import { createFilter } from './view/filter.js';
 import PointListPresenter from './presenter/point-list-presenter.js';
 
