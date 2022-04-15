@@ -1,11 +1,5 @@
 import AbstractView from '../view/abstract-view.js';
-
-export const RenderPosition = {
-  BEFOREBEGIN: 'beforebegin',
-  AFTERBEGINE: 'afterbegin',
-  BEFOREEND: 'beforeend',
-  AFTEREND: 'afterend',
-};
+import { ListType, RenderPosition } from './const.js';
 
 export const render = (container, element, place) => {
   const parent = container instanceof AbstractView ? container.element : container;
@@ -56,5 +50,29 @@ export const remove = (component) => {
     throw new Error('Can remove only components');
   }
 
-  component.remove();
+  component.element.remove();
+  component.removeElement();
+};
+
+export const changeType = (type) => {
+  switch (type) {
+    case ListType.TAXI:
+      return 'Taxi';
+    case ListType.BUS:
+      return 'Bus';
+    case ListType.TRAIN:
+      return 'Train';
+    case ListType.SHIP:
+      return 'Ship';
+    case ListType.DRIVE:
+      return 'Drive';
+    case ListType.FLIGHT:
+      return 'Flight';
+    case ListType.CHECKIN:
+      return 'Check-in';
+    case ListType.SIGHTSEEING:
+      return 'Sightseeing';
+    case ListType.RESTAURANT:
+      return 'Restaurant';
+  }
 };

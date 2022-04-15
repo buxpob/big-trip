@@ -1,4 +1,4 @@
-import AbstractView from '../view/abstract-view.js';
+import AbstractView from './abstract-view.js';
 
 const createTripInfo = () => (
   `<section class="trip-main__trip-info  trip-info">

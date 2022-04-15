@@ -1,4 +1,4 @@
-import AbstractView from '../view/abstract-view.js';
+import AbstractView from './abstract-view.js';
 
 const createEmptyFilterDescription = () => (
   '<p class="trip-events__msg">There are no past events now</p>'

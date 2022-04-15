@@ -1,5 +1,10 @@
 import dayjs from 'dayjs';
-import AbstractView from '../view/abstract-view.js';
+import SmartView from './smart-view.js';
+import { changeType } from '../utils/render.js';
+import { createPointListOffers, createListDescriptions, createListPhotos} from '../utils/mock.js';
+import flatpickr from 'flatpickr';
+
+import '../../node_modules/flatpickr/dist/flatpickr.css';
 
 const BLANK_POINT = {
   date: dayjs().format('DD/MM/YY'),
@@ -20,7 +25,7 @@ const BLANK_POINT = {
   }
 };
 
-const createData = (date) => dayjs(date).format('DD/MM/YY hh mm');
+const createData = (date) => dayjs(date).format('DD-MM-YY hh mm');
 
 const createListOffers = (offer) =>
   offer.listOffers.map((item) => `<div class="event__available-offers">
@@ -34,11 +39,14 @@ const createListOffers = (offer) =>
       </div>`).join(' ');
 
 const createSiteEditFormTemplate = (point) => {
-  const {date, type, city, price, offer, info} = point;
+  const {price, dateStart, dateEnd, destination, offer, type} = point;
 
-  const dataInfo = createData(date);
-
+  const datePointStart = createData(dateStart);
+  const datePointEnd = createData(dateEnd);
   const listOffers = createListOffers(offer);
+  const {city, description, photos } = destination;
+
+  const isSubmitDisabled = (city === '');
 
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -46,7 +54,7 @@ const createSiteEditFormTemplate = (point) => {
         <div class="event__type-wrapper">
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
             <span class="visually-hidden">Choose event type</span>
-            <img class="event__type-icon" width="17" height="17" src="img/icons/flight.png" alt="Event type icon">
+            <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
           </label>
           <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
@@ -116,10 +124,10 @@ const createSiteEditFormTemplate = (point) => {
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dataInfo}">
+          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${datePointStart}">
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dataInfo}">
+          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${datePointEnd}">
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -130,7 +138,7 @@ const createSiteEditFormTemplate = (point) => {
           <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitDisabled ? 'disabled' : ''} >Save</button>
         <button class="event__reset-btn" type="reset">Cancel</button>
       </header>
       <section class="event__details">
@@ -144,11 +152,11 @@ const createSiteEditFormTemplate = (point) => {
 
         <section class="event__section  event__section--destination">
           <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">${info.descriptions}</p>
+          <p class="event__destination-description">${description}</p>
 
           <div class="event__photos-container">
             <div class="event__photos-tape">
-            ${info.photos.map((values) => `<img class="event__photo" src="${values}" alt="Event photo"></img>`).join('')};
+            ${photos.map((values) => `<img class="event__photo" src="${values}" alt="Event photo"></img>`).join('')}
           </div>
           </div>
         </section>
@@ -156,16 +164,45 @@ const createSiteEditFormTemplate = (point) => {
     </form>
   </li>`;
 };
-export default class ItemPointForm extends AbstractView {
-  #point = null;
+
+export default class PointEditView extends SmartView {
+  #datepickerStart = null;
+  #datepickerEnd = null;
 
   constructor(point = BLANK_POINT) {
     super();
-    this.#point = point;
+    this._data = PointEditView.parsePointToData(point);
+
+    this.#setInnerHandles();
+    this.#setDatepicker();
   }
 
   get template() {
-    return createSiteEditFormTemplate(this.#point);
+    return createSiteEditFormTemplate(this._data);
+  }
+
+  removeElement = () => {
+    super.removeElement();
+
+    if (this.#datepickerStart) {
+      this.#datepickerStart.destroy();
+      this.#datepickerStart = null;
+    }
+
+    if (this.#datepickerEnd) {
+      this.#datepickerEnd.destroy();
+      this.#datepickerEnd = null;
+    }
+  }
+
+  reset = (point) => {
+    this.updateData(PointEditView.parsePointToData(point));
+  }
+
+  restoreHandles = () => {
+    this.#setInnerHandles();
+    this.#setDatepicker();
+    this.setFormSubmitHandler(this._callback.formSubmit);
   }
 
   setFormSubmitHandler = (callback) => {
@@ -173,8 +210,96 @@ export default class ItemPointForm extends AbstractView {
     this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
   };
 
+  #setDatepicker =() => {
+    this.#datepickerStart = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        dateFormat: 'j F',
+        defaultDate: this._data.dateStart,
+        onChange: this.#changeDatePointStart,
+      }
+    );
+    this.#datepickerEnd = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        dateFormat: 'j F',
+        defaultDate: this._data.dateEnd,
+        onChange: this.#changeDatePointEnd,
+      }
+    );
+  }
+
+  #setInnerHandles = () => {
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#changeTypePoint);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#changeCityPoint);
+  }
+
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this._callback.formSubmit();
+    this._callback.formSubmit(PointEditView.parseDataToPoint(this._data));
   }
+
+  #changeDatePointStart = ([userDateStart]) => {
+    this.updateData(
+      {
+        dateStart: userDateStart,
+      }
+    );
+  }
+
+  #changeDatePointEnd = ([userDateEnd]) => {
+    this.updateData(
+      {
+        dateEnd: userDateEnd,
+      }
+    );
+  }
+
+  #changeTypePoint = (evt) => {
+    evt.preventDefault();
+    this.updateData(
+      {
+        type: changeType(evt.target.value),
+        offer: createPointListOffers(evt.target.value),
+      }
+    );
+  }
+
+  #changeCityPoint = (evt) => {
+    evt.preventDefault();
+    if (evt.target.value === '') {
+      this.updateData(
+        {
+          city: evt.target.value,
+          info: {
+            descriptions: '',
+            photos: [],
+          }
+        });
+    } else {
+
+      this.updateData(
+        {
+          city: evt.target.value,
+          info: {
+            descriptions: createListDescriptions(),
+            photos: createListPhotos(),
+          }
+        }
+      );
+    }
+  }
+
+  static parsePointToData = (point) => ({...point});
+
+  static parseDataToPoint = (data) => {
+    const point = {...data};
+
+    if (point.city === '') {
+      point.info.descriptions = '';
+      point.info.photos = '';
+    }
+
+    return point;
+  };
 }

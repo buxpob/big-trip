@@ -1,6 +1,7 @@
-import ItemPointForm from '../view/site-form-create-view.js';
-import ItemPoint from '../view/site-item-list-view.js';
-import { render, RenderPosition, replace, remove } from '../render/render.js';
+import PointEditView from '../view/edit-point-view.js';
+import PointView from '../view/point-view.js';
+import { render, replace, remove } from '../utils/render.js';
+import { RenderPosition } from '../utils/const.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -30,8 +31,8 @@ export default class PointPresenter {
     const prevPointComponent = this.#pointComponent;
     const prevPointEditComponent = this.#pointEditComponent;
 
-    this.#pointComponent = new ItemPoint(point);
-    this.#pointEditComponent = new ItemPointForm(point);
+    this.#pointComponent = new PointView(point);
+    this.#pointEditComponent = new PointEditView(point);
 
     this.#pointComponent.setEditClickHandler(this.#handleEditClick);
     this.#pointComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
@@ -50,8 +51,8 @@ export default class PointPresenter {
       replace(this.#pointEditComponent, prevPointEditComponent);
     }
 
-    remove(prevPointComponent.element);
-    remove(prevPointEditComponent.element);
+    remove(prevPointComponent);
+    remove(prevPointEditComponent);
   }
 
   destroy = () => {
@@ -81,6 +82,7 @@ export default class PointPresenter {
   #onEscKeyDown = (evt) => {
     if (evt.key === 'Esc' || evt.key === 'Escape') {
       evt.preventDefault();
+      this.#pointEditComponent.reset(this.#point);
       this.#replaceFormToPoint();
     }
   };

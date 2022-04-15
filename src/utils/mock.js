@@ -45,11 +45,34 @@ const AmountOffers = {
   MAX: 5,
 };
 
-const getRandomDate = () => {
+const gerRandomDateDay = () => {
   const maxDaysGap = 7;
-  const daysGap = _.random(-maxDaysGap , maxDaysGap);
+  return _.random(-maxDaysGap , maxDaysGap);
+};
 
-  const date = dayjs().add(daysGap, 'day').toDate();
+const gerRandomDateHour = () => {
+  const maxDaysGap = 12;
+  return _.random(0 , maxDaysGap);
+};
+
+const gerRandomDateMinute = () => {
+  const maxDaysGap = 60;
+  return _.random(0 , maxDaysGap);
+};
+
+export const getRandomDateStart = () => {
+  const day = gerRandomDateDay();
+  const hour = gerRandomDateHour();
+  const minute = gerRandomDateMinute();
+  const date = dayjs().add(day, 'day').add(hour, 'hour').add(minute, 'minute').toDate();
+  return date;
+};
+
+const getRandomDateEnd = (dayStart) => {
+  const day = _.random(0, 1);
+  const hour = gerRandomDateHour();
+  const minute = gerRandomDateMinute();
+  const date = dayjs(dayStart).add(day, 'day').add(day, 'day').add(hour, 'minute').add(minute, 'hour').toDate();
   return date;
 };
 
@@ -57,14 +80,14 @@ const getRandomTypeRoute = () => typeRoute[_.random(0, typeRoute.length - 1)];
 
 const getRandomCity = () => cities[_.random(0, cities.length - 1)];
 
-const createListDescriptions = () => {
+export const createListDescriptions = () => {
   const countDescriptions = _.random(AmountDescriptions.MIN, AmountDescriptions.MAX);
 
   const listDescriptions = descriptions.sort(() => Math.random() - 0.5).slice(0, countDescriptions);
   return listDescriptions;
 };
 
-const createListOffers = (el) => {
+export const createPointListOffers = (el) => {
   const offer = {
     'type': el,
     'listOffers': [],
@@ -82,7 +105,7 @@ const createListOffers = (el) => {
   return offer;
 };
 
-const createListPhotos = () => {
+export const createListPhotos = () => {
   const listPhoto = [];
   const countPhotos = _.random(AmountPhotos.MIN, AmountPhotos.MAX);
   for (let i = 0; i < countPhotos; i++) {
@@ -105,20 +128,21 @@ const createPrice = (arr) => {
 
 export const createPointRoute = () => {
   const typePoint = getRandomTypeRoute();
-  const offers = createListOffers(typePoint);
+  const offers = createPointListOffers(typePoint);
+  const dayStart = getRandomDateStart();
 
   return {
     id: nanoid(),
-    date: getRandomDate(),
-    time: _.random(30, 60),
-    type: typePoint,
-    city: getRandomCity(),
-    offer: offers,
-    isFavorite: true,
     price: createPrice(offers),
-    info: {
+    dateStart: dayStart,
+    dateEnd: getRandomDateEnd(dayStart),
+    destination: {
       descriptions: createListDescriptions(),
+      name: getRandomCity(),
       photos: createListPhotos(),
-    }
+    },
+    isFavorite: true,
+    offer: offers,
+    type: typePoint,
   };
 };
