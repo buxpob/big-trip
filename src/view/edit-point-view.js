@@ -1,52 +1,73 @@
 import dayjs from 'dayjs';
+// import he from 'he';
 import SmartView from './smart-view.js';
-import { changeType } from '../utils/render.js';
-import { createPointListOffers, createListDescriptions, createListPhotos} from '../utils/mock.js';
+import { types, cities } from '../const.js';
 import flatpickr from 'flatpickr';
 
-import '../../node_modules/flatpickr/dist/flatpickr.css';
-
 const BLANK_POINT = {
-  date: dayjs().format('DD/MM/YY'),
-  type: 'Flight',
-  city: 'Geneva',
-  price: null,
-  offer: {
-    type: null,
-    listOffers: null,
-  },
-  info: {
-    descriptions: 'Geneva is a city in Switzerland that lies at the southern tip of expansive Lac Léman (Lake Geneva). Surrounded by the Alps and Jura mountains, the city has views of dramatic Mont Blanc.',
-    photos: `<img class="event__photo" src="img/photos/1.jpg" alt="Event photo">
-              <img class="event__photo" src="img/photos/2.jpg" alt="Event photo">
-              <img class="event__photo" src="img/photos/3.jpg" alt="Event photo">
-              <img class="event__photo" src="img/photos/4.jpg" alt="Event photo">
-              <img class="event__photo" src="img/photos/5.jpg" alt="Event photo">`,
+  price: 1000,
+  dateStart: dayjs().toDate(),
+  dateEnd: dayjs().toDate(),
+  type: 'bus',
+  isFavorite: false,
+  offers: [],
+  isNewPoint: true,
+  destination: {
+    name: 'Geneva',
+    description: 'Geneva is a city in Switzerland that lies at the southern tip of expansive Lac Léman (Lake Geneva). Surrounded by the Alps and Jura mountains, the city has views of dramatic Mont Blanc.',
+    pictures: [],
   }
 };
 
-const createData = (date) => dayjs(date).format('DD-MM-YY hh mm');
+const createData = (date) => dayjs(date).format('DD/MM/YY hh mm');
 
-const createListOffers = (offer) =>
-  offer.listOffers.map((item) => `<div class="event__available-offers">
-      <div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${item.id}" type="checkbox" name="event-offer-luggage" checked>
-        <label class="event__offer-label" for="event-offer-luggage-1">
-          <span class="event__offer-title">${item.title}</span>
-          &plus;&euro;&nbsp;
-          <span class="event__offer-price">${item.price}</span>
-        </label>
-      </div>`).join(' ');
+const createCityList = (list) => {
+  list.map((city) => `<option value="${city}">`).join('');
+};
+
+const cityList = createCityList(cities);
+
+const createListOffers = (offers, isDisabled) =>
+  offers.map((offer) => `<div class="event__available-offers">
+  <div class="event__offer-selector">
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${offer.id}" type="checkbox" name="event-offer-luggage" ${isDisabled ? 'readonly' : ''}>
+    <label class="event__offer-label" for="event-offer-luggage-1">
+      <span class="event__offer-title">${offer.title}</span>
+      &plus;&euro;&nbsp;
+      <span class="event__offer-price">${offer.price}</span>
+    </label>
+  </div>`).join(' ');
+
+const createTypesTemplate = (currentType, isDisabled) =>
+  types.map((type) => `<div class="event__type-item">
+    <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${currentType === type ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+    <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type}</label>
+  </div>`).join('');
 
 const createSiteEditFormTemplate = (point) => {
-  const {price, dateStart, dateEnd, destination, offer, type} = point;
+  const {
+    price,
+    dateStart,
+    dateEnd,
+    destination,
+    offers,
+    type,
+    isDisabled,
+    isSaving,
+    isDeleting,
+    isNewPoint,
+  } = point;
 
   const datePointStart = createData(dateStart);
   const datePointEnd = createData(dateEnd);
-  const listOffers = createListOffers(offer);
-  const {city, description, photos } = destination;
+  const listOffers = createListOffers(offers);
+  const listTypes = createTypesTemplate(type);
+  const {name, description, pictures } = destination;
 
-  const isSubmitDisabled = (city === '');
+  const isSubmitDisabled = (name === '');
+
+  const createButtonTextreset = isDeleting ? 'Deleting...' : 'Delete';
+  const createButtonText = isNewPoint ? 'Cancel' : `${createButtonTextreset}`;
 
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -60,74 +81,34 @@ const createSiteEditFormTemplate = (point) => {
 
           <div class="event__type-list">
             <fieldset class="event__type-group">
-              <legend class="visually-hidden">Event type</legend>
-
-              <div class="event__type-item">
-                <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi">
-                <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus">
-                <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train">
-                <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship">
-                <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive">
-                <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" checked>
-                <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in">
-                <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing">
-                <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant">
-                <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
-              </div>
+              <legend class="visually-hidden">Event type</legend>    
+          
+              ${listTypes}
+              
             </fieldset>
           </div>
         </div>
 
         <div class="event__field-group  event__field-group--destination">
           <label class="event__label  event__type-output" for="event-destination-1">
+
             ${type}
+
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${city}" list="destination-list-1">
-          <datalist id="destination-list-1">
-            <option value="Amsterdam"></option>
-            <option value="Geneva"></option>
-            <option value="Chamonix"></option>
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${name}" list="destination-list-1">
+          <datalist id="destination-list-1" ${isDisabled ? 'disabled' : ''}>
+
+            ${cityList}
+
           </datalist>
         </div>
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${datePointStart}">
+          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${datePointStart}" ${isDisabled ? 'disabled' : ''}>
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${datePointEnd}">
+          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${datePointEnd}" ${isDisabled ? 'disabled' : ''}>
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -135,11 +116,11 @@ const createSiteEditFormTemplate = (point) => {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
+          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${price}" ${isDisabled ? 'disabled' : ''}>
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitDisabled ? 'disabled' : ''} >Save</button>
-        <button class="event__reset-btn" type="reset">Cancel</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitDisabled ? 'disabled' : ''} ${isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
+        <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${createButtonText}</button>
       </header>
       <section class="event__details">
         <section class="event__section  event__section--offers">
@@ -156,7 +137,9 @@ const createSiteEditFormTemplate = (point) => {
 
           <div class="event__photos-container">
             <div class="event__photos-tape">
-            ${photos.map((values) => `<img class="event__photo" src="${values}" alt="Event photo"></img>`).join('')}
+
+            ${pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.destination}"></img>`).join('')}
+
           </div>
           </div>
         </section>
@@ -172,8 +155,7 @@ export default class PointEditView extends SmartView {
   constructor(point = BLANK_POINT) {
     super();
     this._data = PointEditView.parsePointToData(point);
-
-    this.#setInnerHandles();
+    this.#setInnerHandlers();
     this.#setDatepicker();
   }
 
@@ -199,10 +181,11 @@ export default class PointEditView extends SmartView {
     this.updateData(PointEditView.parsePointToData(point));
   }
 
-  restoreHandles = () => {
-    this.#setInnerHandles();
+  restoreHandlers = () => {
+    this.#setInnerHandlers();
     this.#setDatepicker();
     this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setFormDeleteHandler(this._callback.deleteClick);
   }
 
   setFormSubmitHandler = (callback) => {
@@ -210,33 +193,44 @@ export default class PointEditView extends SmartView {
     this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
   };
 
+  setFormDeleteHandler = (callback) => {
+    this._callback.deleteClick = callback;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#deleteClickHandler);
+  }
+
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formSubmit(PointEditView.parseDataToPoint(this._data));
+  }
+
+  #deleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.deleteClick(PointEditView.parseDataToPoint(this._data));
+  }
+
   #setDatepicker =() => {
     this.#datepickerStart = flatpickr(
       this.element.querySelector('#event-start-time-1'),
       {
-        dateFormat: 'j F',
+        dateFormat: 'Y/m/d',
         defaultDate: this._data.dateStart,
         onChange: this.#changeDatePointStart,
       }
     );
+
     this.#datepickerEnd = flatpickr(
       this.element.querySelector('#event-end-time-1'),
       {
-        dateFormat: 'j F',
+        dateFormat: 'Y/m/d',
         defaultDate: this._data.dateEnd,
         onChange: this.#changeDatePointEnd,
       }
     );
   }
 
-  #setInnerHandles = () => {
+  #setInnerHandlers = () => {
     this.element.querySelector('.event__type-group').addEventListener('change', this.#changeTypePoint);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#changeCityPoint);
-  }
-
-  #formSubmitHandler = (evt) => {
-    evt.preventDefault();
-    this._callback.formSubmit(PointEditView.parseDataToPoint(this._data));
   }
 
   #changeDatePointStart = ([userDateStart]) => {
@@ -259,8 +253,8 @@ export default class PointEditView extends SmartView {
     evt.preventDefault();
     this.updateData(
       {
-        type: changeType(evt.target.value),
-        offer: createPointListOffers(evt.target.value),
+        type: evt.target.value,
+        offers: [],
       }
     );
   }
@@ -268,37 +262,42 @@ export default class PointEditView extends SmartView {
   #changeCityPoint = (evt) => {
     evt.preventDefault();
     if (evt.target.value === '') {
-      this.updateData(
-        {
-          city: evt.target.value,
-          info: {
-            descriptions: '',
-            photos: [],
-          }
-        });
+      this.updateData({
+        destination: {
+          ...this._data.destination,
+          name: evt.target.value,
+          descriptions: '',
+          photos: [],
+        }});
     } else {
-
-      this.updateData(
-        {
-          city: evt.target.value,
-          info: {
-            descriptions: createListDescriptions(),
-            photos: createListPhotos(),
-          }
-        }
-      );
+      this.updateData({
+        destination:
+        {...this._data.destination,
+          name: evt.target.value,
+          descriptions: '',
+          photos: [],
+        }});
     }
   }
 
-  static parsePointToData = (point) => ({...point});
+  static parsePointToData = (point) => ({...point,
+    isDisabled: false,
+    isSaving: false,
+    isDeleting: false,
+  });
 
   static parseDataToPoint = (data) => {
     const point = {...data};
 
-    if (point.city === '') {
-      point.info.descriptions = '';
-      point.info.photos = '';
+    if (point.destination.name === '') {
+      point.destination.descriptions = '';
+      point.destination.photos = [];
     }
+
+    delete point.isDisabled;
+    delete point.isSaving;
+    delete point.isDeleting;
+    delete point.isNewPoint;
 
     return point;
   };

@@ -1,17 +1,16 @@
-export const updateItem = (items, updated) => {
-  const index = items.findIndex((item) => item.id === updated.id);
+import dayjs from 'dayjs';
+import { renderTime } from '../utils/render.js';
 
-  if (index === -1) {
-    return items;
-  }
+export const sortPointDay = (a, b) => a.dateStart - b.dateStart;
 
-  return [
-    ...items.slice(0, index),
-    updated,
-    ...items.slice(index + 1),
-  ];
-};
+export const sortPointPrice = (a, b) => a.price - b.price;
 
-export const sortPointTime = (a, b) => b.time - a.time;
+export const sortPointTime = (a, b) => renderTime(a) - renderTime(b);
 
-export const sortPointPrice = (a, b) => b.price - a.price;
+export const isDatesEqual = (a, b) => dayjs(a).isSame(b, 'D');
+
+export const isPricesEqual = (a, b) => a.price === b.price;
+
+export const isTimeEqual = (a, b) => renderTime(a) === renderTime(b);
+
+export const correctInputCityName = (cityList, cityName) => cityList.some((city) => city === cityName);

@@ -1,5 +1,6 @@
+import dayjs from 'dayjs';
 import AbstractView from '../view/abstract-view.js';
-import { ListType, RenderPosition } from './const.js';
+import { ListType, RenderPosition } from '../const.js';
 
 export const render = (container, element, place) => {
   const parent = container instanceof AbstractView ? container.element : container;
@@ -76,3 +77,76 @@ export const changeType = (type) => {
       return 'Restaurant';
   }
 };
+
+export const renderDay = (timeDay) => {
+  if (timeDay > 10) {
+    return `${timeDay}D`;
+  }
+
+  if (timeDay > 0 && timeDay < 10) {
+    return `0${timeDay}D`;
+  }
+
+  if (timeDay < 1) {
+    return '';
+  }
+};
+
+export const renderHour = (timeHoure) => {
+  if (timeHoure > 24 && timeHoure%24 < 1) {
+    return '00H';
+  }
+
+  if (timeHoure >= 24 && timeHoure%24 < 10) {
+    return `0${timeHoure%24}H`;
+  }
+
+  if (timeHoure > 24 && timeHoure%24 >= 10) {
+    return `${timeHoure%24}H`;
+  }
+
+  if (timeHoure >= 10 && timeHoure < 24) {
+    return `${timeHoure}H`;
+  }
+
+  if (timeHoure > 0 && timeHoure < 10) {
+    return `0${timeHoure}H`;
+  }
+
+  if (timeHoure < 1) {
+    return '';
+  }
+};
+
+export const renderMinute = (timeMinute) => {
+  if (timeMinute >= 60 && timeMinute%60 < 10) {
+    return `0${timeMinute%60}M`;
+  }
+
+  if (timeMinute >= 60 && timeMinute%60 >= 10) {
+    return `${timeMinute%60}M`;
+  }
+
+  if (timeMinute >= 10 && timeMinute < 60) {
+    return `${timeMinute}M`;
+  }
+
+  if (timeMinute > 0 && timeMinute < 10) {
+    return `0${timeMinute}M`;
+  }
+
+  if (timeMinute < 1) {
+    return '00M';
+  }
+};
+
+export const renderDiffTime = (start, end) => {
+  const diffTime = (typeTime) => dayjs(end).diff(dayjs(start), typeTime);
+  const timeDay = diffTime('d');
+  const timeHoure = diffTime('h');
+  const timeMinute = diffTime('m');
+
+  return `${renderDay(timeDay)} ${renderHour(timeHoure)} ${renderMinute(timeMinute)}`;
+};
+
+export const renderTime = (date) => dayjs(date.dateEnd).diff(dayjs(date.dateStart), 'm');
