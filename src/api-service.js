@@ -15,46 +15,53 @@ export default class ApiService {
   }
 
   get points() {
-    return this.#load({url: 'points'})
-      .then(ApiService.parseResponse);
+    return this.#load({ url: 'points' }).then(ApiService.parseResponse);
   }
 
-  updatePoint = async(point) => {
+  get destinations() {
+    return this.#load({ url: 'destinations' }).then(ApiService.parseResponse);
+  }
+
+  get offers() {
+    return this.#load({ url: 'offers' }).then(ApiService.parseResponse);
+  }
+
+  updatePoint = async (point) => {
     const response = await this.#load({
       url: `points/${point.id}`,
       method: Method.PUT,
       body: JSON.stringify(this.#adaptToServer(point)),
-      headers: new Headers({'Content-Type': 'application/json'}),
+      headers: new Headers({ 'Content-Type': 'application/json' }),
     });
 
     const parsedResponse = await ApiService.parseResponse(response);
 
     return parsedResponse;
-  }
+  };
 
-  addPoint = async(point) => {
+  addPoint = async (point) => {
     const response = await this.#load({
       url: 'points',
       method: Method.POST,
       body: JSON.stringify(this.#adaptToServer(point)),
-      headers: new Headers({'Content-Type': 'application/json'}),
+      headers: new Headers({ 'Content-Type': 'application/json' }),
     });
 
     const parsedResponse = await ApiService.parseResponse(response);
 
     return parsedResponse;
-  }
+  };
 
-  deletePoint = async(point) => {
+  deletePoint = async (point) => {
     const response = await this.#load({
       url: `points/${point.id}`,
       method: Method.DELETE,
     });
 
     return response;
-  }
+  };
 
-  #load = async({
+  #load = async ({
     url,
     method = Method.GET,
     body = null,
@@ -62,10 +69,11 @@ export default class ApiService {
   }) => {
     headers.append('Authorization', this.#autorization);
 
-    const response = await fetch(
-      `${this.#endPoint}/${url}`,
-      {method, body, headers},
-    );
+    const response = await fetch(`${this.#endPoint}/${url}`, {
+      method,
+      body,
+      headers,
+    });
 
     try {
       ApiService.checkStatus(response);
@@ -73,22 +81,23 @@ export default class ApiService {
     } catch (err) {
       ApiService.catchError(err);
     }
-  }
+  };
 
   static checkStatus = (response) => {
     if (!response.ok) {
       throw new Error(`${response.status}: ${response.statusText}`);
     }
-  }
+  };
 
   static parseResponse = (response) => response.json();
 
   static catchError = (err) => {
     throw err;
-  }
+  };
 
   #adaptToServer = (point) => {
-    const adaptedPoint = {...point,
+    const adaptedPoint = {
+      ...point,
       'base_price': point.price,
       'date_from': point.dateStart.toISOString(),
       'date_to': point.dateEnd.toISOString(),
@@ -96,10 +105,10 @@ export default class ApiService {
     };
 
     delete adaptedPoint.price;
-    delete adaptedPoint.dateStart;
-    delete adaptedPoint.dateEnd;
+    delete adaptedPoint.dateFrom;
+    delete adaptedPoint.dateTo;
     delete adaptedPoint.isFavorite;
 
     return adaptedPoint;
-  }
+  };
 }

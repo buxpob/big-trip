@@ -32,32 +32,26 @@ export default class PointPresenter {
     this.#changeMode = changeMode;
   }
 
-  init = (point) => {
+  init = (offers, destinations, point) => {
     this.#point = point;
 
     const prevPointComponent = this.#pointComponent;
     const prevPointEditComponent = this.#pointEditComponent;
 
     this.#pointComponent = new PointView(point);
-    this.#pointEditComponent = new PointEditView(point);
+    this.#pointEditComponent = new PointEditView(offers, destinations, point);
 
     this.#pointComponent.setEditClickHandler(this.#handleEditClick);
     this.#pointComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
     this.#pointEditComponent.setFormDeleteHandler(this.#handleDeleteClick);
     this.#pointEditComponent.setFormSubmitHandler(this.#handleFormSubmit);
+    this.#pointEditComponent.setFormCloseHandler(this.#handleCloseClick);
 
     if (prevPointComponent === null || prevPointEditComponent === null) {
       render(this.#pointListContainer, this.#pointComponent, RenderPosition.BEFOREEND);
       return;
     }
 
-    // if (this.#pointListContainer.element.contains(prevPointComponent.element)) {
-    //   replace(this.#pointComponent, prevPointComponent);
-    // }
-
-    // if (this.#pointListContainer.element.contains(prevPointEditComponent.element)) {
-    //   replace(this.#pointEditComponent, prevPointEditComponent);
-    // }
     if (this.#mode === Mode.DEFAULT) {
       replace(this.#pointComponent, prevPointComponent);
     }
@@ -154,14 +148,9 @@ export default class PointPresenter {
 
     this.#changeData(
       UserAction.UPDATE_POINT,
-      isMinorUpdate ? UpdateType.MINOR: UpdateType.PATCH,
+      isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       update,
     );
-  }
-
-  #handleCloseClick = () => {
-    this.#pointEditComponent.reset(this.#point);
-    this.#replaceFormToPoint();
   }
 
   #handleDeleteClick = (point) => {
@@ -171,4 +160,9 @@ export default class PointPresenter {
       point,
     );
   }
+
+  #handleCloseClick = () => {
+    this.#pointEditComponent.reset(this.#point);
+    this.#replaceFormToPoint();
+  };
 }

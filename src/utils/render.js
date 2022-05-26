@@ -150,3 +150,5 @@ export const renderDiffTime = (start, end) => {
 };
 
 export const renderTime = (date) => dayjs(date.dateEnd).diff(dayjs(date.dateStart), 'm');
+
+export const filterOffers = (listOffers, typePoint) => listOffers.find((list) => list.type === typePoint).offers;

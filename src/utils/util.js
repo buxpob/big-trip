@@ -3,9 +3,9 @@ import { renderTime } from '../utils/render.js';
 
 export const sortPointDay = (a, b) => a.dateStart - b.dateStart;
 
-export const sortPointPrice = (a, b) => a.price - b.price;
+export const sortPointPrice = (a, b) => b.price - a.price;
 
-export const sortPointTime = (a, b) => renderTime(a) - renderTime(b);
+export const sortPointTime = (a, b) => renderTime(b) - renderTime(a);
 
 export const isDatesEqual = (a, b) => dayjs(a).isSame(b, 'D');
 

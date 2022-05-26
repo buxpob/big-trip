@@ -9,7 +9,7 @@ import FilterModel from './model/filter-model.js';
 import StatisticsView from './view/statistics-view.js';
 import ApiService from './api-service.js';
 
-const AUTORIZATION = 'Basic er123jrkvps';
+const AUTORIZATION = 'Basic ee123jrkvps';
 const END_POINT = 'https://16.ecmascript.pages.academy/big-trip';
 
 const siteHeader = document.querySelector('.page-header');
@@ -73,3 +73,5 @@ pointsModel.init().finally(() => {
     addNewPoint();
   });
 });
+
+

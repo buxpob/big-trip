@@ -3,12 +3,7 @@ import { FilterType } from '../const.js';
 
 const isExpiredAfter = (date) => dayjs().isAfter(date.dateStart, 'day');
 const isExpiredBefore = (date) => dayjs().isBefore(date.dateStart, 'day');
-
-// export const filter = {
-//   [FilterType.EVERYTHING]: (points) => points.filter((point) => point),
-//   [FilterType.FUTURE]: (points) => points.filter((point) => isExpired(point.dateStart)),
-//   [FilterType.PAST]: (points) => points.filter((point) => !isExpired(point.dateStart)),
-// };
+const isToday = (date) => dayjs().isSame(date, 'D');
 
 export const filter = (points, filterType) => {
   switch (filterType) {
@@ -17,6 +12,6 @@ export const filter = (points, filterType) => {
     case FilterType.FUTURE:
       return points.filter((point) => !isExpiredAfter(point));
     case FilterType.PAST:
-      return points.filter((point) => !isExpiredBefore(point));
+      return points.filter((point) => !isExpiredBefore(point) && !isToday(point.dateStart));
   }
 };
