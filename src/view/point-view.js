@@ -22,6 +22,7 @@ const createPointComponent = (point) => {
 
   const time = renderDiffTime(dateStart, dateEnd);
 
+  // const filterOfferList = offers.filter((offer) => offer.isChecked === true);
   const listOffers = createOffer(offers);
 
   const favoriteClassName = isFavorite ? 'event__favorite-btn--active' : '';

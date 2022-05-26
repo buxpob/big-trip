@@ -2,6 +2,8 @@ import AbstractAbservable from '../utils/abstract-observable.js';
 import { UpdateType } from '../const.js';
 
 export default class PointsModel extends AbstractAbservable {
+  #offers = [];
+  #destinations = [];
   #points = [];
   #apiService = null;
 
@@ -14,16 +16,31 @@ export default class PointsModel extends AbstractAbservable {
     return this.#points;
   }
 
-  init = async() => {
+  get destinations() {
+    return this.#destinations;
+  }
+
+  get offers() {
+    return this.#offers;
+  }
+
+  init = async () => {
     try {
       const points = await this.#apiService.points;
       this.#points = points.map(this.#adaptToClient);
-    } catch(err) {
+      const destinations = await this.#apiService.destinations;
+      this.#destinations = destinations;
+      const offers = await this.#apiService.offers;
+      this.#offers = offers;
+
+    } catch (err) {
       this.#points = [];
+      this.#destinations = [];
+      this.#offers = [];
     }
 
     this._notify(UpdateType.INIT);
-  }
+  };
 
   updatePoint = async (updateType, update) => {
     const index = this.#points.findIndex((point) => point.id === update.id);
@@ -42,7 +59,7 @@ export default class PointsModel extends AbstractAbservable {
       ];
 
       this._notify(updateType, updatedPoint);
-    } catch(err) {
+    } catch (err) {
       throw new Error('Can\'t update point');
     }
   };
@@ -53,10 +70,10 @@ export default class PointsModel extends AbstractAbservable {
       const newPoint = this.#adaptToClient(response);
       this.#points = [newPoint, ...this.#points];
       this._notify(updateType, newPoint);
-    } catch(err) {
+    } catch (err) {
       throw new Error('Can\'t add point');
     }
-  }
+  };
 
   deletePoint = async (updateType, update) => {
     const index = this.#points.findIndex((point) => point.id === update.id);
@@ -72,13 +89,14 @@ export default class PointsModel extends AbstractAbservable {
         ...this.#points.slice(index + 1),
       ];
       this._notify(updateType);
-    } catch(err) {
+    } catch (err) {
       throw new Error('Can\'t delete point');
     }
-  }
+  };
 
   #adaptToClient = (point) => {
-    const adaptedPoint = {...point,
+    const adaptedPoint = {
+      ...point,
       price: point['base_price'],
       dateStart: new Date(point['date_from']),
       dateEnd: new Date(point['date_to']),
@@ -91,5 +109,5 @@ export default class PointsModel extends AbstractAbservable {
     delete adaptedPoint['is_favorite'];
 
     return adaptedPoint;
-  }
+  };
 }

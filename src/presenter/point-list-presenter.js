@@ -50,6 +50,18 @@ export default class PointListPresenter {
     return filteredPoints;
   }
 
+  get destinations() {
+    const destinations = this.#pointsModel.destinations;
+
+    return destinations;
+  }
+
+  get offers() {
+    const offers = this.#pointsModel.offers;
+
+    return offers;
+  }
+
   init = () => {
     render(this.#boardContainer, this.#pointListComponent, RenderPosition.BEFOREEND);
 
@@ -69,7 +81,9 @@ export default class PointListPresenter {
   }
 
   createPoint = (callback) => {
-    this.#pointNewPresenter.init(callback);
+    const offers = this.offers;
+    const destinations = this.destinations;
+    this.#pointNewPresenter.init(callback, offers, destinations);
   }
 
   #handleModeChange = () => {
@@ -149,14 +163,14 @@ export default class PointListPresenter {
     render(this.#boardContainer, this.#noPointComponent, RenderPosition.BEFOREEND);
   }
 
-  #renderPoint = (point) => {
+  #renderPoint = (offers, destinations, point) => {
     const pointPresenter = new PointPresenter(this.#pointListComponent, this.#handleViewAction, this.#handleModeChange);
-    pointPresenter.init(point);
+    pointPresenter.init(offers, destinations, point);
     this.#pointPresenter.set(point.id, pointPresenter);
   };
 
-  #renderPoints = (points) => {
-    points.forEach((point) => this.#renderPoint(point));
+  #renderPoints = (offers, destinations, points) => {
+    points.forEach((point) => this.#renderPoint(offers, destinations, point));
   };
 
   #renderLoading = () => {
@@ -188,6 +202,8 @@ export default class PointListPresenter {
       return;
     }
 
+    const offers = this.offers;
+    const destinations = this.destinations;
     const points = this.points;
     const pointCount = points.length;
 
@@ -197,6 +213,6 @@ export default class PointListPresenter {
     }
 
     this.#renderSort();
-    this.#renderPoints(points);
+    this.#renderPoints(offers, destinations, points);
   }
 }

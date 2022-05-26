@@ -1,12 +1,14 @@
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import SmartView from './smart-view.js';
-import { createListPricePoint,
+import {
+  createListPricePoint,
   createListTypePoint,
   createListTimePoint,
   listKeySort,
   listValueSort,
-  createTypeTime } from '../utils/statistics.js';
+  createTypeTime,
+} from '../utils/statistics.js';
 
 Chart.defaults.global.datasets.bar.categoryPercentage = 0.5;
 
@@ -22,14 +24,16 @@ const renderMoneyChart = (moneyCtx, points) => {
     type: 'horizontalBar',
     data: {
       labels: listType,
-      datasets: [{
-        data: listPrice,
-        backgroundColor: '#ffffff',
-        hoverBackgroundColor: '#ffffff',
-        anchor: 'start',
-        barThickness: 44,
-        minBarLength: 80,
-      }],
+      datasets: [
+        {
+          data: listPrice,
+          backgroundColor: '#ffffff',
+          hoverBackgroundColor: '#ffffff',
+          anchor: 'start',
+          barThickness: 44,
+          minBarLength: 80,
+        },
+      ],
     },
     options: {
       responsive: false,
@@ -52,27 +56,31 @@ const renderMoneyChart = (moneyCtx, points) => {
         position: 'left',
       },
       scales: {
-        yAxes: [{
-          ticks: {
-            fontColor: '#000000',
-            padding: 5,
-            fontSize: 13,
+        yAxes: [
+          {
+            ticks: {
+              fontColor: '#000000',
+              padding: 5,
+              fontSize: 13,
+            },
+            gridLines: {
+              display: false,
+              drawBorder: false,
+            },
           },
-          gridLines: {
-            display: false,
-            drawBorder: false,
+        ],
+        xAxes: [
+          {
+            ticks: {
+              display: false,
+              beginAtZero: true,
+            },
+            gridLines: {
+              display: false,
+              drawBorder: false,
+            },
           },
-        }],
-        xAxes: [{
-          ticks: {
-            display: false,
-            beginAtZero: true,
-          },
-          gridLines: {
-            display: false,
-            drawBorder: false,
-          },
-        }],
+        ],
       },
       legend: {
         display: false,
@@ -94,14 +102,16 @@ const renderTypeChart = (typeCtx, points) => {
     type: 'horizontalBar',
     data: {
       labels: listType,
-      datasets: [{
-        data: listQuantity,
-        backgroundColor: '#ffffff',
-        hoverBackgroundColor: '#ffffff',
-        anchor: 'start',
-        barThickness: 44,
-        minBarLength: 80,
-      }],
+      datasets: [
+        {
+          data: listQuantity,
+          backgroundColor: '#ffffff',
+          hoverBackgroundColor: '#ffffff',
+          anchor: 'start',
+          barThickness: 44,
+          minBarLength: 80,
+        },
+      ],
     },
     options: {
       responsive: false,
@@ -124,27 +134,31 @@ const renderTypeChart = (typeCtx, points) => {
         position: 'left',
       },
       scales: {
-        yAxes: [{
-          ticks: {
-            fontColor: '#000000',
-            padding: 5,
-            fontSize: 13,
+        yAxes: [
+          {
+            ticks: {
+              fontColor: '#000000',
+              padding: 5,
+              fontSize: 13,
+            },
+            gridLines: {
+              display: false,
+              drawBorder: false,
+            },
           },
-          gridLines: {
-            display: false,
-            drawBorder: false,
+        ],
+        xAxes: [
+          {
+            ticks: {
+              display: false,
+              beginAtZero: true,
+            },
+            gridLines: {
+              display: false,
+              drawBorder: false,
+            },
           },
-        }],
-        xAxes: [{
-          ticks: {
-            display: false,
-            beginAtZero: true,
-          },
-          gridLines: {
-            display: false,
-            drawBorder: false,
-          },
-        }],
+        ],
       },
       legend: {
         display: false,
@@ -166,14 +180,16 @@ const renderTimeChart = (timeCtx, points) => {
     type: 'horizontalBar',
     data: {
       labels: listType,
-      datasets: [{
-        data: listQuantity,
-        backgroundColor: '#ffffff',
-        hoverBackgroundColor: '#ffffff',
-        anchor: 'start',
-        barThickness: 44,
-        minBarLength: 80,
-      }],
+      datasets: [
+        {
+          data: listQuantity,
+          backgroundColor: '#ffffff',
+          hoverBackgroundColor: '#ffffff',
+          anchor: 'start',
+          barThickness: 44,
+          minBarLength: 80,
+        },
+      ],
     },
     options: {
       responsive: false,
@@ -196,27 +212,31 @@ const renderTimeChart = (timeCtx, points) => {
         position: 'left',
       },
       scales: {
-        yAxes: [{
-          ticks: {
-            fontColor: '#000000',
-            padding: 5,
-            fontSize: 13,
+        yAxes: [
+          {
+            ticks: {
+              fontColor: '#000000',
+              padding: 5,
+              fontSize: 13,
+            },
+            gridLines: {
+              display: false,
+              drawBorder: false,
+            },
           },
-          gridLines: {
-            display: false,
-            drawBorder: false,
+        ],
+        xAxes: [
+          {
+            ticks: {
+              display: false,
+              beginAtZero: true,
+            },
+            gridLines: {
+              display: false,
+              drawBorder: false,
+            },
           },
-        }],
-        xAxes: [{
-          ticks: {
-            display: false,
-            beginAtZero: true,
-          },
-          gridLines: {
-            display: false,
-            drawBorder: false,
-          },
-        }],
+        ],
       },
       legend: {
         display: false,
@@ -279,11 +299,11 @@ export default class StatisticsView extends SmartView {
       this.#timeChart.destroy();
       this.#timeChart = null;
     }
-  }
+  };
 
   restoreHandlers = () => {
     this.#setCharts();
-  }
+  };
 
   #setCharts = () => {
     const points = this._data;
@@ -299,5 +319,5 @@ export default class StatisticsView extends SmartView {
     this.#moneyChart = renderMoneyChart(moneyCtx, points);
     this.#typeChart = renderTypeChart(typeCtx, points);
     this.#timeChart = renderTimeChart(timeCtx, points);
-  }
+  };
 }
